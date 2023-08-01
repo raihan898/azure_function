@@ -1,0 +1,194 @@
+# import logging
+
+# import azure.functions as func
+
+
+# def main(req: func.HttpRequest) -> func.HttpResponse:
+#     logging.info('Python HTTP trigger function processed a request.')
+
+#     name = req.params.get('name')
+#     if not name:
+#         try:
+#             req_body = req.get_json()
+#         except ValueError:
+#             pass
+#         else:
+#             name = req_body.get('name')
+
+#     if name:
+#         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
+#     else:
+#         return func.HttpResponse(
+#              "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+#              status_code=200
+#         )
+
+
+#--------------------------------code for implement---------------------------
+
+
+
+
+import logging
+import azure.functions as func
+from datetime import datetime, timedelta
+from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
+import pandas as pd
+from azure.storage.blob import BlobServiceClient
+import os
+
+#enter credentials
+account_name = 'simplestorage00678'
+# Storage_account_name = 'simplestorage00678' 
+account_key = 'gISOyoI5xMnKlHCuuJidm42L4j++77YBjYD6HqAatLfkJC+N+3HzhiFDBuEjeXQH7ieSHy5HOnSm+AStAIvh4w=='
+container_name = 'my-data'
+connection_string = 'DefaultEndpointsProtocol=https;AccountName=simplestorage00678;AccountKey=gISOyoI5xMnKlHCuuJidm42L4j++77YBjYD6HqAatLfkJC+N+3HzhiFDBuEjeXQH7ieSHy5HOnSm+AStAIvh4w==;EndpointSuffix=core.windows.net'
+# second_ontainer_name = 'output-csv'
+
+
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    # Get the JSON data from the request body
+    try:
+        req_body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            "Invalid JSON data provided",
+            status_code=400
+        )
+
+    # Verify if the JSON data is a list of dictionaries
+    if not isinstance(req_body, list) or not all(isinstance(item, dict) for item in req_body):
+        return func.HttpResponse(
+            "JSON data should be a list of dictionaries",
+            status_code=400
+        )
+
+
+
+blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+container_client = blob_service_client.get_container_client(container_name)
+
+
+# file_name = "data_for_fuctionApp.json"
+# print(file_name)
+
+# blob = container_client.get_blob_client(file_name).download_blob().readall().decode("utf-8")
+
+# data = pd.read_json(blob)
+# print(data)
+
+
+# # converting into csv and writing into blob
+# output_file_name = "output.csv"
+# output_blob = container_client.get_blob_client(output_file_name)
+
+# data.to_csv(output_file_name, index=False)
+
+# with open(output_file_name, "rb") as file:
+#     output_blob.upload_blob(file, overwrite=True)
+
+# print("Data written to output.csv successfully.")
+
+
+
+
+##-----------------------------------------here for nested json----------------
+
+# file_name = "API1_West_hira.json"
+# print(file_name)
+
+# blob = container_client.get_blob_client(file_name).download_blob().readall().decode("utf-8")
+
+# data = pd.read_json(blob)
+# print(data)
+
+
+
+# import pandas as pd
+# import json
+# import requests
+
+# from pandas.io.json import json_normalize
+
+
+# data["tableauRetailer"]
+
+
+# nycphil = json_normalize(data['tableauRetailer'])
+# nycphil.head(10)
+
+
+# output_file_name = "flatten_output.csv"
+# output_blob = container_client.get_blob_client(output_file_name)
+
+# data.to_csv(output_file_name, index=False)
+
+# with open(output_file_name, "rb") as file:
+#     output_blob.upload_blob(file, overwrite=True)
+
+# print("Data written to output.csv successfully.")
+
+
+
+## --------------------------------------------------------------------------------
+# ## -- Now converting csv to xml
+
+
+# file_name = "MOCK_DATA.csv"
+# print(file_name)
+
+# blob = container_client.get_blob_client(file_name).download_blob().readall().decode("utf-8")
+
+# import pandas as pd
+# import csv
+# import io
+
+# data = pd.read_csv(io.StringIO(blob))
+# print(data)
+
+
+# # converting the csv into xml and writing into blob
+# output_file_name = "xml_mock_data.xml"
+# output_blob = container_client.get_blob_client(output_file_name)
+
+# data.to_xml(output_file_name, index=False)
+
+# with open(output_file_name, "rb") as file:
+#     output_blob.upload_blob(file, overwrite=True)
+
+# print("Data written to output.csv successfully.")
+
+
+
+##-------------------------------------------------------------
+##-- Now going to convert xml to csv------
+
+
+file_name = "xml_mock_data.xml"
+print(file_name)
+
+blob = container_client.get_blob_client(file_name).download_blob().readall().decode("utf-8")
+
+# import pandas as pd
+# import csv
+# import io
+
+data = pd.read_xml((blob))
+print(data)
+
+
+# converting the xml into csv and writing into blob
+output_file_name = "xml_to_csv_mock_data.csv"
+output_blob = container_client.get_blob_client(output_file_name)
+
+data.to_csv(output_file_name, index=False)
+
+with open(output_file_name, "rb") as file:
+    output_blob.upload_blob(file, overwrite=True)
+
+print("Data written to output.csv successfully.")
+
+
+
+
+
